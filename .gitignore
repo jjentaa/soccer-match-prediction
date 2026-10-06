@@ -1,0 +1,18 @@
+# raw downloads are reproducible via preprocessing/download_data.py
+preprocessing/raw/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.ipynb_checkpoints/
+*.egg-info/
+
+# os / editor
+.DS_Store
+.vscode/
+.idea/
+
+# secrets
+.env
+kaggle.json
