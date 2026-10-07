@@ -43,19 +43,6 @@ FWD    65013.0  72.2  7.1  41.0  67.0  72.0  77.0  94.0
 - pairs_abs_corr_over_0.7: 85
 - n_pairs: 1369
 
-## Home formation vs home win rate
-
-```
-            mean  size
-formation             
-5-3-2      0.361   119
-4-5-1      0.448  5414
-3-5-2      0.462   563
-3-4-3      0.464   405
-4-4-2      0.470  5746
-4-3-3      0.488  3624
-```
-
 ## Missing values
 
 - matches: 25979

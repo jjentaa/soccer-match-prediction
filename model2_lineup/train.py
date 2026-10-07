@@ -28,7 +28,7 @@ from sklearn.model_selection import StratifiedKFold, cross_val_predict
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from features import DATA, SEED, build_dataset
+from features import SEED, build_dataset
 
 OUT = Path(__file__).resolve().parent / "outputs"
 CLASSES = np.array(["A", "D", "H"])  # sklearn sorts labels; probability columns follow this order
@@ -67,15 +67,6 @@ def tune_draw_weight(y, proba):
     return float(grid[int(np.argmax(f1s))])
 
 
-def odds_benchmark(test_ids, y_test):
-    """Bookmaker reference: Bet365 implied probabilities (needs odds, so only part of the test split)."""
-    m = pd.read_parquet(DATA / "matches.parquet", columns=["match_api_id", "B365A", "B365D", "B365H"])
-    m = m.set_index("match_api_id").loc[test_ids]
-    has = m.notna().all(axis=1).values
-    proba = 1 / m[has].values
-    return {**scores(y_test[has], proba), "n": int(has.sum())}
-
-
 def main():
     OUT.mkdir(exist_ok=True)
     ds = build_dataset()
@@ -111,7 +102,6 @@ def main():
         "test": scores(y_te, test_proba),
         "test_f1_per_class": dict(zip(CLASSES, np.round(f1_score(y_te, pred, average=None, labels=CLASSES), 4))),
         "test_confusion_rows_true_cols_pred_ADH": confusion_matrix(y_te, pred, labels=CLASSES).tolist(),
-        "bookmaker_b365_test": odds_benchmark(test["match_api_id"].values, y_te),
     }
     print(json.dumps(metrics, indent=2))
     (OUT / "metrics.json").write_text(json.dumps(metrics, indent=2))

@@ -78,29 +78,6 @@ def attribute_correlation(players_tr, plt):
     }
 
 
-def formation_results(train, plt, min_n=100):
-    d = train[train["home_n_players"] == 11]  # partial lineups produce fake shapes such as 4-4-1
-    form = (d["home_DEF_n"].astype(int).astype(str) + "-" + d["home_MID_n"].astype(int).astype(str)
-            + "-" + d["home_FWD_n"].astype(int).astype(str))
-    g = (d.assign(formation=form, home_win=d["result"].eq("H"))
-          .groupby("formation")["home_win"].agg(["mean", "size"]))
-    g = g[g["size"] >= min_n].sort_values("mean")
-    overall = d["result"].eq("H").mean()
-
-    fig, ax = plt.subplots(figsize=(7, 4))
-    y = np.arange(len(g))
-    ax.barh(y, g["mean"] * 100, height=0.6, color=ps.ACCENT)
-    for i, (m, n) in enumerate(zip(g["mean"], g["size"])):
-        ax.text(m * 100 + 0.8, i, f"{m * 100:.1f}%  (n={n:,})", va="center", fontsize=8, color=ps.TEXT_2)
-    ax.set_yticks(y, g.index)
-    ax.set_xlabel(f"Home win rate (%)  -  all full-XI matches: {overall * 100:.1f}%")
-    ax.set_xlim(0, 70)
-    ax.grid(axis="y", visible=False)
-    ax.set_title(f"Home win rate by home formation (full XI, n >= {min_n})")
-    ps.save(fig, "eda_formation_results.png")
-    return g.round(3)
-
-
 def missing_summary(ds, train):
     feat_cols = [c for c in ds.columns if c.startswith(("home_", "away_", "diff_"))]
     no_lineup = ds["home_n_players"].isna() & ds["away_n_players"].isna()
@@ -132,7 +109,6 @@ def main():
         "Result rate (%) by rating difference": rating_diff_vs_result(train, plt),
         "Overall rating by line": rating_by_line(players_tr, plt),
         "Attribute correlation": attribute_correlation(players_tr, plt),
-        "Home formation vs home win rate": formation_results(train, plt),
         "Missing values": missing_summary(ds, train),
     }
 
