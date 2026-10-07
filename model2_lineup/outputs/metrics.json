@@ -1,10 +1,6 @@
 {
   "split": "random 70:30, random_state=42, over matches.parquet in file order",
   "cv_train": {
-    "logreg": {
-      "accuracy": 0.5092,
-      "macro_f1": 0.4022
-    },
     "lgbm_all": {
       "accuracy": 0.5134,
       "macro_f1": 0.3927
@@ -18,36 +14,36 @@
       "macro_f1": 0.397
     }
   },
-  "best": "logreg",
+  "best": "lgbm_select",
   "draw_weight": 1.5,
   "test_raw": {
-    "accuracy": 0.5178,
-    "macro_f1": 0.4021
+    "accuracy": 0.5245,
+    "macro_f1": 0.3973
   },
   "test": {
-    "accuracy": 0.4909,
-    "macro_f1": 0.4433
+    "accuracy": 0.4881,
+    "macro_f1": 0.4423
   },
   "test_f1_per_class": {
-    "A": 0.4307,
-    "D": 0.2739,
-    "H": 0.6253
+    "A": 0.4251,
+    "D": 0.2799,
+    "H": 0.6219
   },
   "test_confusion_rows_true_cols_pred_ADH": [
     [
-      819,
-      614,
-      788
+      788,
+      639,
+      794
     ],
     [
-      383,
-      528,
-      1055
+      358,
+      555,
+      1053
     ],
     [
-      380,
-      748,
-      2479
+      340,
+      806,
+      2461
     ]
   ],
   "bookmaker_b365_test": {

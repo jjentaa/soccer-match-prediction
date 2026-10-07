@@ -1,7 +1,6 @@
-"""Model 2 (lineup evaluation): compare lineup-only classifiers and export H/D/A probabilities.
+"""Model 2 (lineup evaluation): compare tree-based lineup classifiers and export H/D/A probabilities.
 
 Experiments, all scored by 5-fold CV on the training split:
-    logreg      impute + scale + multinomial logistic regression (linear reference)
     lgbm_all    LightGBM on every feature
     lgbm_pca    impute + scale + PCA (95 % variance) + LightGBM
     lgbm_select feature selection by LightGBM importance + LightGBM
@@ -12,17 +11,18 @@ Outputs in model2_lineup/outputs/:
     pred_model2.parquet   match_api_id, set, p_H, p_D, p_A  (train rows are out-of-fold)
     metrics.json          CV and test scores
     feature_importance.csv
+    model2.joblib         fitted best model, feature list and draw weight (used by predict.py)
 """
 import json
 from pathlib import Path
 
+import joblib
 import numpy as np
 import pandas as pd
 from lightgbm import LGBMClassifier
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import SelectFromModel
 from sklearn.impute import SimpleImputer
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
 from sklearn.model_selection import StratifiedKFold, cross_val_predict
 from sklearn.pipeline import make_pipeline
@@ -43,8 +43,6 @@ def lgbm():
 
 
 EXPERIMENTS = {
-    "logreg": lambda: make_pipeline(SimpleImputer(strategy="median"), StandardScaler(),
-                                    LogisticRegression(C=0.05, max_iter=2000)),
     "lgbm_all": lgbm,
     "lgbm_pca": lambda: make_pipeline(SimpleImputer(strategy="median"), StandardScaler(),
                                       PCA(n_components=0.95, random_state=SEED), lgbm()),
@@ -99,6 +97,7 @@ def main():
     print(f"best: {best}  draw weight: {w}  cv after reweight: {scores(y_tr, reweight_draw(oof[best], w))}")
 
     model = EXPERIMENTS[best]().fit(X_tr, y_tr)
+    joblib.dump({"name": best, "model": model, "features": feat_cols, "draw_weight": w}, OUT / "model2.joblib")
     raw_test = model.predict_proba(X_te)
     test_proba = reweight_draw(raw_test, w)
     pred = CLASSES[test_proba.argmax(1)]
