@@ -79,6 +79,7 @@ Result: 22,625 of the 22,637 matches in the 9 covered leagues are matched; 1 mat
 - **`lineups`** (`build_lineups`) — the 22 lineup slots unpivoted to one row per player, then joined to
   `player_attributes` with `merge_asof(direction="backward")`: each player gets the most recent snapshot dated on or
   before the match. This prevents future ratings leaking into past matches. Every lineup row found a snapshot.
+- **`split`** (`build_split`) — random 70:30 train/test assignment per match, seed 42, shared by all models.
 
 ## Deliberately not done here
 
@@ -87,4 +88,3 @@ These depend on the train/test split or on the individual model, so they belong 
 - **Imputation** — must be fitted on the training split only. Remaining missing values are listed in `datasets/README.md`.
 - **Rolling / window features** (team form).
 - **Class-imbalance handling** and **dimension reduction** (PCA).
-- **Train / validation / test split.**
