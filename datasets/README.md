@@ -1,6 +1,6 @@
 # Datasets
 
-Seven cleaned, already-joined tables. All were produced by [`../preprocessing/`](../README.md);
+Seven cleaned, already-joined tables plus the shared train/test split. All were produced by [`../preprocessing/`](../README.md);
 do not edit them by hand — change the script and re-run it.
 
 ```python
@@ -19,6 +19,7 @@ Coverage: 11 European leagues, seasons 2008/2009 – 2015/2016, 25,979 matches.
 | [`team_attributes`](#team_attributesparquet) | 1,457 × 23 | a FIFA tactics snapshot of a team | `team_api_id`, `date` |
 | [`players`](#playersparquet) | 11,060 × 6 | a player | `player_api_id` |
 | [`teams`](#teamsparquet) | 299 × 4 | a team | `team_api_id` |
+| [`split`](#splitparquet) | 25,979 × 2 | a match's train/test assignment | `match_api_id` |
 
 ## How the tables join
 
@@ -74,7 +75,11 @@ X = (matches[["match_api_id", "date", "season", "result"]]
   final whistle. As features they must come from *earlier* matches only, e.g.
   `team_matches.groupby("team_api_id")["points"].transform(lambda s: s.shift(1).rolling(5).mean())`.
 - **Pre-match columns are safe as-is:** lineups, pitch positions, betting odds, and the attribute columns in `lineups`.
-- **Split by time** (by `season` or `date`), never randomly.
+- **Use the shared split** in `split.parquet` (random 70:30, seed 42) — do not re-split your own table, or the
+  models' predictions will not line up for the ensemble.
+- **Because the split is random, test matches are scattered through time.** Any feature built from match outcomes
+  must use only matches dated *before* the row's match, and only *training* matches, so that no test label
+  ever reaches a feature.
 - **Missing values are left as NaN** so that imputation can be fitted on the training split only. Percentages are listed per column below.
 
 ---
@@ -227,3 +232,19 @@ as-of join shown above. Matches before a team's first snapshot (all of 2008/09 a
 | `team_fifa_api_id` | float | Id in the FIFA game database (3.7 % missing) |
 | `team_long_name` | str | e.g. `Manchester United` |
 | `team_short_name` | str | e.g. `MUN` |
+
+## `split.parquet`
+
+The train/test assignment every model must use: `train_test_split(sorted match ids, test_size=0.3, random_state=42)`.
+18,185 train and 7,794 test matches.
+
+| Column | Type | Description |
+|---|---|---|
+| `match_api_id` | int | → `matches` |
+| `split` | str | `train` / `test` |
+
+```python
+split = pd.read_parquet("datasets/split.parquet")
+matches = matches.merge(split, on="match_api_id")
+train, test = matches[matches.split == "train"], matches[matches.split == "test"]
+```

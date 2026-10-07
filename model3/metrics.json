@@ -1,0 +1,32 @@
+{
+  "baseline: always home win": {
+    "accuracy": 0.4559,
+    "macro_f1": 0.2087,
+    "log_loss": 1.0657
+  },
+  "reference: Bet365 odds (6,800 test matches with odds)": {
+    "accuracy": 0.5316,
+    "macro_f1": 0.389,
+    "log_loss": 0.9742
+  },
+  "model 3: style only (no graph)": {
+    "accuracy": 0.47,
+    "macro_f1": 0.289,
+    "log_loss": 1.0436
+  },
+  "model 3: style + style graphs": {
+    "accuracy": 0.4868,
+    "macro_f1": 0.3235,
+    "log_loss": 1.0296
+  },
+  "model 3: style + style graphs + results graph": {
+    "accuracy": 0.5038,
+    "macro_f1": 0.3612,
+    "log_loss": 1.0098
+  },
+  "model 3: style + style graphs + results graph, class_weight=balanced": {
+    "accuracy": 0.443,
+    "macro_f1": 0.4288,
+    "log_loss": 1.0401
+  }
+}

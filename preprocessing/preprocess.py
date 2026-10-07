@@ -8,6 +8,7 @@ Outputs (parquet):
   matches.parquet           one row per match: result, lineups, odds + football-data.co.uk match stats
   team_matches.parquet      matches in long form, one row per (match, team) - base for rolling "form" features
   lineups.parquet           one row per (match, side, slot) with the player's latest attributes *before* the match
+  split.parquet             shared random 70:30 train/test assignment per match (seed 42)
 
 Usage: python preprocessing/preprocess.py
 """
@@ -17,6 +18,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 HERE = Path(__file__).resolve().parent
 ESD_SQLITE = HERE / "raw" / "european_soccer" / "database.sqlite"
@@ -214,6 +216,15 @@ def build_team_matches(matches: pd.DataFrame) -> pd.DataFrame:
     return tm.sort_values(["team_api_id", "date"]).reset_index(drop=True)
 
 
+def build_split(matches: pd.DataFrame) -> pd.DataFrame:
+    """Random 70:30 train/test split, shared by every model so their predictions line up."""
+    ids = matches["match_api_id"].sort_values().to_numpy()
+    train_ids, _ = train_test_split(ids, test_size=0.3, random_state=42)
+    split = pd.DataFrame({"match_api_id": ids})
+    split["split"] = np.where(split["match_api_id"].isin(train_ids), "train", "test")
+    return split
+
+
 def main() -> None:
     DATASETS.mkdir(parents=True, exist_ok=True)
     print("loading European Soccer Database")
@@ -233,6 +244,7 @@ def main() -> None:
     outputs = {
         "teams": teams, "players": players, "player_attributes": pa, "team_attributes": ta,
         "matches": matches, "team_matches": team_matches, "lineups": lineups,
+        "split": build_split(matches),
     }
     for name, df in outputs.items():
         df.to_parquet(DATASETS / f"{name}.parquet", index=False)
