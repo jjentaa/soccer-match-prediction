@@ -1,0 +1,73 @@
+{
+  "split": "datasets/split.parquet (random 70:30, random_state=42)",
+  "half_life_days": 730,
+  "draw_weight": 1.55,
+  "mean_rho_by_league": {
+    "Belgium Jupiler League": -0.0252,
+    "England Premier League": -0.0714,
+    "France Ligue 1": -0.1208,
+    "Germany 1. Bundesliga": -0.0919,
+    "Italy Serie A": -0.0309,
+    "Netherlands Eredivisie": -0.0849,
+    "Poland Ekstraklasa": -0.0127,
+    "Portugal Liga ZON Sagres": -0.0212,
+    "Scotland Premier League": -0.0523,
+    "Spain LIGA BBVA": 0.0199,
+    "Switzerland Super League": -0.0841
+  },
+  "test": {
+    "baseline: always home win (training class rates)": {
+      "accuracy": 0.4559,
+      "macro_f1": 0.2087,
+      "log_loss": 1.0657
+    },
+    "Poisson, no time decay": {
+      "accuracy": 0.5036,
+      "macro_f1": 0.3726,
+      "log_loss": 1.0107
+    },
+    "Poisson + time decay (half-life 730)": {
+      "accuracy": 0.5045,
+      "macro_f1": 0.3743,
+      "log_loss": 1.0095
+    },
+    "Dixon-Coles + time decay (final)": {
+      "accuracy": 0.5056,
+      "macro_f1": 0.3822,
+      "log_loss": 1.0096
+    },
+    "final + draw weight 1.55": {
+      "accuracy": 0.4713,
+      "macro_f1": 0.434,
+      "log_loss": 1.0263
+    },
+    "reference: Bet365 odds (6800 test matches with odds)": {
+      "accuracy": 0.5319,
+      "macro_f1": 0.3883,
+      "log_loss": 0.9742
+    }
+  },
+  "test_f1_per_class_draw_weighted": {
+    "H": 0.596,
+    "D": 0.3018,
+    "A": 0.4043
+  },
+  "test_confusion_draw_weighted_rows_true_cols_pred_HDA": [
+    [
+      2298,
+      916,
+      339
+    ],
+    [
+      1039,
+      640,
+      330
+    ],
+    [
+      821,
+      676,
+      735
+    ]
+  ],
+  "test_rows_without_rating": 253
+}
