@@ -1,0 +1,129 @@
+{
+  "single_models": {
+    "model 1: team rating": {
+      "train": {
+        "accuracy": 0.507,
+        "macro_f1": 0.3787,
+        "log_loss": 1.0064
+      },
+      "test": {
+        "accuracy": 0.5056,
+        "macro_f1": 0.3822,
+        "log_loss": 1.0096
+      }
+    },
+    "model 2: lineup": {
+      "train": {
+        "accuracy": 0.5156,
+        "macro_f1": 0.394,
+        "log_loss": 0.9959
+      },
+      "test": {
+        "accuracy": 0.5139,
+        "macro_f1": 0.39,
+        "log_loss": 1.001
+      }
+    },
+    "model 3: style graph": {
+      "train": {
+        "accuracy": 0.4998,
+        "macro_f1": 0.3556,
+        "log_loss": 1.0096
+      },
+      "test": {
+        "accuracy": 0.5038,
+        "macro_f1": 0.3612,
+        "log_loss": 1.0098
+      }
+    }
+  },
+  "combination_rules": {
+    "average": {
+      "cv_train": {
+        "accuracy": 0.5192,
+        "macro_f1": 0.3736,
+        "log_loss": 0.9893
+      },
+      "test": {
+        "accuracy": 0.5167,
+        "macro_f1": 0.3732,
+        "log_loss": 0.9932
+      }
+    },
+    "geometric mean": {
+      "cv_train": {
+        "accuracy": 0.5197,
+        "macro_f1": 0.3743,
+        "log_loss": 0.989
+      },
+      "test": {
+        "accuracy": 0.5169,
+        "macro_f1": 0.3732,
+        "log_loss": 0.993
+      }
+    },
+    "weighted average": {
+      "cv_train": {
+        "accuracy": 0.5211,
+        "macro_f1": 0.3817,
+        "log_loss": 0.9874
+      },
+      "test": {
+        "accuracy": 0.5186,
+        "macro_f1": 0.38,
+        "log_loss": 0.9922
+      }
+    },
+    "stacking (logistic regression)": {
+      "cv_train": {
+        "accuracy": 0.5219,
+        "macro_f1": 0.3754,
+        "log_loss": 0.9857
+      },
+      "test": {
+        "accuracy": 0.519,
+        "macro_f1": 0.3751,
+        "log_loss": 0.9902
+      }
+    },
+    "majority vote": {
+      "cv_train": {
+        "accuracy": 0.5136,
+        "macro_f1": 0.3683,
+        "log_loss": null
+      },
+      "test": {
+        "accuracy": 0.5155,
+        "macro_f1": 0.3723,
+        "log_loss": null
+      }
+    }
+  },
+  "chosen": "stacking (logistic regression)",
+  "weighted_average_weights": {
+    "model 1: team rating": 0.3183,
+    "model 2: lineup": 0.5463,
+    "model 3: style graph": 0.1354
+  },
+  "draw_weight": 1.5,
+  "test_final": {
+    "accuracy": 0.519,
+    "macro_f1": 0.3751,
+    "log_loss": 0.9902
+  },
+  "test_final_draw_weighted": {
+    "accuracy": 0.4863,
+    "macro_f1": 0.4441,
+    "log_loss": 1.0046
+  },
+  "test_reference_bet365": {
+    "accuracy": 0.5319,
+    "macro_f1": 0.3883,
+    "log_loss": 0.9742
+  },
+  "test_final_on_matches_with_odds": {
+    "accuracy": 0.524,
+    "macro_f1": 0.3797,
+    "log_loss": 0.9848
+  }
+}

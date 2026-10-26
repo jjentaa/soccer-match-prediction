@@ -1,0 +1,70 @@
+{
+  "test_matches": 7794,
+  "share": {
+    "all three agree": 0.723,
+    "two against one": 0.265,
+    "three different predictions": 0.012
+  },
+  "matches": {
+    "all three agree": 5634,
+    "two against one": 2064,
+    "three different predictions": 96
+  },
+  "pairwise_agreement": {
+    "model 1 & model 2": 0.803,
+    "model 1 & model 3": 0.832,
+    "model 2 & model 3": 0.798
+  },
+  "agreed_prediction": {
+    "H": 4502,
+    "D": 0,
+    "A": 1132
+  },
+  "accuracy": {
+    "all three agree": {
+      "model 1": 0.559,
+      "model 2": 0.559,
+      "model 3": 0.559,
+      "ensemble": 0.559
+    },
+    "models disagree": {
+      "model 1": 0.367,
+      "model 2": 0.397,
+      "model 3": 0.361,
+      "ensemble": 0.415
+    }
+  },
+  "actual_results": {
+    "all three agree": {
+      "H": 0.483,
+      "D": 0.25,
+      "A": 0.267
+    },
+    "models disagree": {
+      "H": 0.385,
+      "D": 0.277,
+      "A": 0.338
+    }
+  },
+  "two_against_one": {
+    "model 1": {
+      "matches": 584,
+      "odd_model_correct": 0.307,
+      "other_two_correct": 0.423,
+      "ensemble_sides_with_odd_model": 0.091
+    },
+    "model 2": {
+      "matches": 853,
+      "odd_model_correct": 0.366,
+      "other_two_correct": 0.376,
+      "ensemble_sides_with_odd_model": 0.442
+    },
+    "model 3": {
+      "matches": 627,
+      "odd_model_correct": 0.29,
+      "other_two_correct": 0.418,
+      "ensemble_sides_with_odd_model": 0.011
+    }
+  },
+  "mean_spread_of_p_home": 0.132
+}

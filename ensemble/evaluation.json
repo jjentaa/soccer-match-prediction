@@ -1,0 +1,234 @@
+{
+  "test_matches": 7794,
+  "Most likely result": {
+    "accuracy": 0.519,
+    "macro_f1": 0.3751,
+    "predicted_counts": {
+      "H": 5694,
+      "D": 0,
+      "A": 2100
+    },
+    "per_class": {
+      "H": {
+        "precision": 0.531,
+        "recall": 0.851,
+        "f1": 0.654,
+        "matches": 3553
+      },
+      "D": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "matches": 2009
+      },
+      "A": {
+        "precision": 0.486,
+        "recall": 0.457,
+        "f1": 0.471,
+        "matches": 2232
+      }
+    },
+    "confusion_rows_actual_cols_predicted_HDA": [
+      [
+        3024,
+        0,
+        529
+      ],
+      [
+        1459,
+        0,
+        550
+      ],
+      [
+        1211,
+        0,
+        1021
+      ]
+    ]
+  },
+  "With the draw weight": {
+    "accuracy": 0.4863,
+    "macro_f1": 0.4441,
+    "predicted_counts": {
+      "H": 4290,
+      "D": 2184,
+      "A": 1320
+    },
+    "per_class": {
+      "H": {
+        "precision": 0.566,
+        "recall": 0.683,
+        "f1": 0.619,
+        "matches": 3553
+      },
+      "D": {
+        "precision": 0.287,
+        "recall": 0.312,
+        "f1": 0.299,
+        "matches": 2009
+      },
+      "A": {
+        "precision": 0.558,
+        "recall": 0.33,
+        "f1": 0.414,
+        "matches": 2232
+      }
+    },
+    "confusion_rows_actual_cols_predicted_HDA": [
+      [
+        2428,
+        861,
+        264
+      ],
+      [
+        1063,
+        626,
+        320
+      ],
+      [
+        799,
+        697,
+        736
+      ]
+    ]
+  },
+  "calibration": [
+    {
+      "bin": "(0.0, 0.4]",
+      "matches": 1354,
+      "mean_confidence": 0.377,
+      "accuracy": 0.397
+    },
+    {
+      "bin": "(0.4, 0.5]",
+      "matches": 2849,
+      "mean_confidence": 0.449,
+      "accuracy": 0.444
+    },
+    {
+      "bin": "(0.5, 0.6]",
+      "matches": 1717,
+      "mean_confidence": 0.546,
+      "accuracy": 0.551
+    },
+    {
+      "bin": "(0.6, 0.7]",
+      "matches": 943,
+      "mean_confidence": 0.646,
+      "accuracy": 0.628
+    },
+    {
+      "bin": "(0.7, 1.0]",
+      "matches": 931,
+      "mean_confidence": 0.774,
+      "accuracy": 0.757
+    }
+  ],
+  "by_league": {
+    "Netherlands Eredivisie": {
+      "matches": 705,
+      "accuracy": 0.562,
+      "macro_f1_draw_weighted": 0.431
+    },
+    "Portugal Liga ZON Sagres": {
+      "matches": 610,
+      "accuracy": 0.546,
+      "macro_f1_draw_weighted": 0.492
+    },
+    "Italy Serie A": {
+      "matches": 903,
+      "accuracy": 0.537,
+      "macro_f1_draw_weighted": 0.464
+    },
+    "Spain LIGA BBVA": {
+      "matches": 928,
+      "accuracy": 0.536,
+      "macro_f1_draw_weighted": 0.446
+    },
+    "Belgium Jupiler League": {
+      "matches": 530,
+      "accuracy": 0.528,
+      "macro_f1_draw_weighted": 0.428
+    },
+    "Switzerland Super League": {
+      "matches": 437,
+      "accuracy": 0.526,
+      "macro_f1_draw_weighted": 0.44
+    },
+    "Germany 1. Bundesliga": {
+      "matches": 728,
+      "accuracy": 0.512,
+      "macro_f1_draw_weighted": 0.431
+    },
+    "Scotland Premier League": {
+      "matches": 546,
+      "accuracy": 0.504,
+      "macro_f1_draw_weighted": 0.445
+    },
+    "France Ligue 1": {
+      "matches": 953,
+      "accuracy": 0.499,
+      "macro_f1_draw_weighted": 0.418
+    },
+    "England Premier League": {
+      "matches": 910,
+      "accuracy": 0.499,
+      "macro_f1_draw_weighted": 0.454
+    },
+    "Poland Ekstraklasa": {
+      "matches": 544,
+      "accuracy": 0.452,
+      "macro_f1_draw_weighted": 0.384
+    }
+  },
+  "ensemble_minus_single_model_paired_bootstrap": {
+    "model 1: team rating": {
+      "accuracy": {
+        "difference": 0.0133,
+        "ci95": [
+          0.0067,
+          0.0201
+        ]
+      },
+      "log_loss": {
+        "difference": -0.0194,
+        "ci95": [
+          -0.0239,
+          -0.0146
+        ]
+      }
+    },
+    "model 2: lineup": {
+      "accuracy": {
+        "difference": 0.0051,
+        "ci95": [
+          -0.0001,
+          0.0104
+        ]
+      },
+      "log_loss": {
+        "difference": -0.0108,
+        "ci95": [
+          -0.014,
+          -0.0078
+        ]
+      }
+    },
+    "model 3: style graph": {
+      "accuracy": {
+        "difference": 0.0151,
+        "ci95": [
+          0.0077,
+          0.0222
+        ]
+      },
+      "log_loss": {
+        "difference": -0.0196,
+        "ci95": [
+          -0.0242,
+          -0.0151
+        ]
+      }
+    }
+  }
+}
