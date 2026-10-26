@@ -94,7 +94,7 @@ def main():
     pred = CLASSES[test_proba.argmax(1)]
 
     metrics = {
-        "split": "random 70:30, random_state=42, over matches.parquet in file order",
+        "split": "datasets/split.parquet (random 70:30, random_state=42)",
         "cv_train": cv_results,
         "best": best,
         "draw_weight": w,

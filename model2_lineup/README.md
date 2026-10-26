@@ -12,7 +12,7 @@ python model2_lineup/predict.py "Barcelona" "Real Madrid CF"
 
 | File | Purpose |
 |---|---|
-| `features.py` | lineups → one row per match (351 features) and the 70:30 split |
+| `features.py` | lineups → one row per match (351 features), with the shared 70:30 split attached |
 | `eda.py` | ratings vs results on the training split |
 | `pca_selection.py` | PCA vs feature selection by CV |
 | `train.py` | final model, test scores, predictions for the ensemble |
@@ -22,7 +22,7 @@ python model2_lineup/predict.py "Barcelona" "Real Madrid CF"
 
 - Input: `lineups` (starters with FIFA attributes joined as-of the match date), `players` (age, height, weight),
   target `matches.result` (H / D / A). Every input is known before kick-off, so no feature leaks the result.
-- Split: random 70:30, `random_state=42`, over all 25,979 matches → 18,185 train / 7,794 test.
+- Split: the shared `datasets/split.parquet` (random 70:30, `random_state=42`) → 18,185 train / 7,794 test.
   All EDA, PCA and model selection use the training split only; the test split is scored once.
 - 758 matches have no lineup and 3,847 have an incomplete one. Their features stay NaN.
 
@@ -45,10 +45,10 @@ Home features, away features, and home − away differences give 117 × 3 = 351 
 ![rating difference vs result](figures/eda_rating_diff_vs_result.png)
 
 - **The stronger XI wins more often.** When the home XI averages more than 8 rating points above the away XI, the
-  home team wins 78.8 %; when it is more than 8 below, it wins 13.4 %.
-- **The draw rate barely moves** (14–30 % in every bin). Lineups say who is stronger, not whether the match
+  home team wins 79.8 %; when it is more than 8 below, it wins 14.3 %.
+- **The draw rate barely moves** (13–30 % in every bin). Lineups say who is stronger, not whether the match
   will be level, so draws are the hardest class.
-- Classes: H 45.7 %, A 28.8 %, D 25.5 %.
+- Classes: H 46.0 %, A 28.8 %, D 25.2 %.
 
 ![attribute correlation](figures/eda_attribute_correlation.png)
 
@@ -68,7 +68,7 @@ Home features, away features, and home − away differences give 117 × 3 = 351 
 | Component | Variance | Meaning (largest loadings) |
 |---|---|---|
 | PC1 | 20.7 % | overall level of *both* teams (home and away rating means) — i.e. league quality |
-| PC2 | 15.2 % | home − away rating gap — which team is stronger |
+| PC2 | 15.3 % | home − away rating gap — which team is stronger |
 | PC3 | 3.4 % | midfield defending gap (tackling, marking, interceptions) |
 | PC4 | 2.5 % | ball-playing defenders gap (passing, crossing, shooting skills of the DEF line) |
 
@@ -81,10 +81,10 @@ LightGBM on top, 5-fold CV. Each reducer is fitted inside the folds.
 
 | Reducer | Best k | CV accuracy | CV macro F1 |
 |---|---|---|---|
-| PCA | 80 components | 0.514 | 0.391 |
-| Feature selection (LightGBM importance) | 40 features | 0.514 | 0.397 |
+| PCA | 160 components | 0.516 | 0.390 |
+| Feature selection (LightGBM importance) | 80 features | 0.516 | 0.395 |
 
-- **All settings land within 0.6 points of accuracy and 1.4 points of macro F1.** Five inputs already give
+- **All settings land within 1.0 point of accuracy and 1.7 points of macro F1.** Five inputs already give
   almost the full score: the signal is the one-dimensional strength gap (PC2), and the other 350 columns are
   mostly redundant with it.
 - Feature selection is slightly better on macro F1 than PCA, and its inputs stay interpretable. The most
@@ -96,23 +96,23 @@ Three tree-based pipelines, compared by 5-fold CV on the training split:
 
 | Pipeline | CV accuracy | CV macro F1 |
 |---|---|---|
-| LightGBM on all 351 features | 0.513 | 0.393 |
-| Impute + scale + PCA (95 % variance) + LightGBM | 0.514 | 0.390 |
-| **Feature selection (above-median importance, 177 features) + LightGBM** | **0.514** | **0.397** |
+| LightGBM on all 351 features | 0.516 | 0.392 |
+| Impute + scale + PCA (95 % variance) + LightGBM | 0.515 | 0.390 |
+| **Feature selection (above-median importance, 177 features) + LightGBM** | **0.516** | **0.394** |
 
 **Class imbalance.** Without help, the model rarely predicts a draw. The draw probability is multiplied by a weight
-tuned on the out-of-fold training predictions to maximise macro F1 (weight = 1.5), then the three probabilities
+tuned on the out-of-fold training predictions to maximise macro F1 (weight = 1.55), then the three probabilities
 are renormalised.
 
 **Test split (7,794 matches), final model:**
 
 | | Accuracy | Macro F1 |
 |---|---|---|
-| Unweighted probabilities | 0.525 | 0.397 |
-| Draw weight 1.5 | 0.488 | 0.442 |
+| Unweighted probabilities | 0.514 | 0.390 |
+| Draw weight 1.55 | 0.476 | 0.438 |
 
-Per-class F1 with the draw weight: home 0.62, away 0.43, draw 0.28. The weight trades 3.6 points of accuracy for
-4.5 points of macro F1.
+Per-class F1 with the draw weight: home 0.61, away 0.41, draw 0.30. The weight trades 3.8 points of accuracy for
+4.8 points of macro F1.
 
 ## Team A vs team B
 
@@ -124,7 +124,7 @@ $ python model2_lineup/predict.py "Barcelona" "Real Madrid CF"
 FC Barcelona (home) vs Real Madrid CF (away) on 2016-05-15  [model: lgbm_select]
   expected XI from: home 2016-05-14, away 2016-05-14
   average overall rating: home 86.5, away 85.2
-  P(home win) 47.3%   P(draw) 15.7%   P(away win) 37.0%
+  P(home win) 57.5%   P(draw) 18.9%   P(away win) 23.6%
   prediction (draw-weighted): home win
 ```
 

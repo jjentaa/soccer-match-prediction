@@ -7,12 +7,10 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
 
 DATA = Path(__file__).resolve().parent.parent / "datasets"
 
 SEED = 42
-TEST_SIZE = 0.3
 
 GK_ATTRS = ["gk_diving", "gk_handling", "gk_kicking", "gk_positioning", "gk_reflexes"]
 OUTFIELD_ATTRS = [
@@ -30,12 +28,13 @@ LINES = ["DEF", "MID", "FWD"]
 
 
 def split_ids(matches: pd.DataFrame) -> pd.Series:
-    """Team-agreed split: random 70:30, seed 42, over every match in matches.parquet (file order)."""
-    train_ids, _ = train_test_split(matches["match_api_id"], test_size=TEST_SIZE, random_state=SEED)
-    return pd.Series(
-        np.where(matches["match_api_id"].isin(train_ids), "train", "test"),
-        index=matches["match_api_id"].values, name="set",
-    )
+    """Team-agreed split, read from datasets/split.parquet so every model uses the same matches.
+
+    Re-running train_test_split here would not reproduce it: the shuffle depends on row order, and
+    split.parquet was drawn over match ids in sorted order, not in matches.parquet file order.
+    """
+    split = pd.read_parquet(DATA / "split.parquet").set_index("match_api_id")["split"]
+    return split.reindex(matches["match_api_id"].values).rename("set")
 
 
 def assign_line(df: pd.DataFrame) -> pd.Series:

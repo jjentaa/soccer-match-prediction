@@ -1,49 +1,49 @@
 {
-  "split": "random 70:30, random_state=42, over matches.parquet in file order",
+  "split": "datasets/split.parquet (random 70:30, random_state=42)",
   "cv_train": {
     "lgbm_all": {
-      "accuracy": 0.5134,
-      "macro_f1": 0.3927
+      "accuracy": 0.5156,
+      "macro_f1": 0.3916
     },
     "lgbm_pca": {
-      "accuracy": 0.5141,
-      "macro_f1": 0.3895
+      "accuracy": 0.5154,
+      "macro_f1": 0.3897
     },
     "lgbm_select": {
-      "accuracy": 0.5142,
-      "macro_f1": 0.397
+      "accuracy": 0.5156,
+      "macro_f1": 0.394
     }
   },
   "best": "lgbm_select",
-  "draw_weight": 1.5,
+  "draw_weight": 1.55,
   "test_raw": {
-    "accuracy": 0.5245,
-    "macro_f1": 0.3973
+    "accuracy": 0.5139,
+    "macro_f1": 0.39
   },
   "test": {
-    "accuracy": 0.4881,
-    "macro_f1": 0.4423
+    "accuracy": 0.4756,
+    "macro_f1": 0.4378
   },
   "test_f1_per_class": {
-    "A": 0.4251,
-    "D": 0.2799,
-    "H": 0.6219
+    "A": 0.4123,
+    "D": 0.2952,
+    "H": 0.606
   },
   "test_confusion_rows_true_cols_pred_ADH": [
     [
-      788,
-      639,
-      794
+      760,
+      705,
+      767
     ],
     [
-      358,
-      555,
-      1053
+      364,
+      626,
+      1019
     ],
     [
-      340,
-      806,
-      2461
+      331,
+      901,
+      2321
     ]
   ]
 }
