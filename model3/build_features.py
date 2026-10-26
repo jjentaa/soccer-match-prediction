@@ -11,12 +11,13 @@ Question: does a team that plays style X tend to beat a team that plays style Y?
 Leakage rule: every graph that carries match outcomes is built only from *training* matches
 dated strictly before the match being described, so no test label reaches any feature.
 
-Usage: python model3/build_features.py     -> model3/features.parquet, model3/styles.parquet
+Usage: python model3/build_features.py     -> model3/features.parquet, styles.parquet, styles.joblib
 """
 
 from collections import defaultdict
 from pathlib import Path
 
+import joblib
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -126,7 +127,9 @@ def latest_snapshot(snapshots: dict, team, date):
     return dated[-1] if dated else None
 
 
-def build(matches: pd.DataFrame, season_teams: dict, snapshots: dict) -> pd.DataFrame:
+def build(matches: pd.DataFrame, season_teams: dict, snapshots: dict, only: set | None = None) -> pd.DataFrame:
+    """Walk through the matches in date order. `only` limits the output to those match ids
+    (the graphs are still updated by every training match), which makes single predictions fast."""
     k = int(np.nanmax(matches[["home_style", "away_style"]].to_numpy())) + 1
     is_train = matches["split"].eq("train").to_numpy()
 
@@ -140,6 +143,8 @@ def build(matches: pd.DataFrame, season_teams: dict, snapshots: dict) -> pd.Data
     rows = []
     for date, day in matches.groupby("date", sort=True):
         for league, lg in day.groupby("league"):
+            if only is not None and not lg["match_api_id"].isin(only).any():
+                continue
             teams = set(lg["home_team_api_id"]) | set(lg["away_team_api_id"])
             since = date - pd.Timedelta(days=RESULTS_WINDOW_DAYS)
             league_history[league] = [h for h in league_history[league] if h[0] >= since]
@@ -225,14 +230,8 @@ def style_pagerank(matchup: np.ndarray) -> dict:
     return {s: r * k for s, r in nx.pagerank(g, weight="weight").items()}
 
 
-def main() -> None:
-    matches = pd.read_parquet(DATA / "matches.parquet")
-    matches = matches[["match_api_id", "league", "season", "date", "home_team_api_id", "away_team_api_id", "result"]]
-    matches = matches.merge(pd.read_parquet(DATA / "split.parquet"), on="match_api_id")
-    team_attributes = pd.read_parquet(DATA / "team_attributes.parquet")
-
-    print("clustering tactic snapshots into styles")
-    scaler, kmeans = fit_styles(team_attributes)
+def assemble(matches, team_attributes, formations, scaler, kmeans, only: set | None = None) -> pd.DataFrame:
+    """All Model 3 features for `matches` (columns: match id, league, season, date, teams, result, split)."""
     matches = attach_tactics(matches, team_attributes, scaler, kmeans).reset_index(drop=True)
 
     # lookups used while walking through the matches in date order
@@ -244,8 +243,7 @@ def main() -> None:
     for team, date, vec in zip(snaps["team_api_id"], snaps["date"], scaler.transform(snaps[TACTICS])):
         snapshots[team].append((date, vec))
 
-    print("walking through matches in date order to build graph features")
-    graph = build(matches, season_teams, snapshots)
+    graph = build(matches, season_teams, snapshots, only)
 
     tactic_cols = [f"{s}_{t}" for s in ["home", "away"] for t in TACTICS]
     feats = matches[["match_api_id", "date", "league", "season", "split", "result",
@@ -256,7 +254,26 @@ def main() -> None:
     feats["weakrank_diff"] = feats["weakrank_home"] - feats["weakrank_away"]
     feats["style_rank_diff"] = feats["style_rank_home"] - feats["style_rank_away"]
     feats["similar_ppg_diff"] = feats["home_ppg_vs_similar_to_away"] - feats["away_ppg_vs_similar_to_home"]
-    feats = feats.merge(formation_features(pd.read_parquet(DATA / "lineups.parquet")), on="match_api_id", how="left")
+    return feats.merge(formations, on="match_api_id", how="left")
+
+
+def load_matches() -> pd.DataFrame:
+    matches = pd.read_parquet(DATA / "matches.parquet")
+    matches = matches[["match_api_id", "league", "season", "date", "home_team_api_id", "away_team_api_id", "result"]]
+    return matches.merge(pd.read_parquet(DATA / "split.parquet"), on="match_api_id")
+
+
+def main() -> None:
+    matches = load_matches()
+    team_attributes = pd.read_parquet(DATA / "team_attributes.parquet")
+
+    print("clustering tactic snapshots into styles")
+    scaler, kmeans = fit_styles(team_attributes)
+    joblib.dump({"scaler": scaler, "kmeans": kmeans}, HERE / "styles.joblib")
+
+    print("walking through matches in date order to build graph features")
+    formations = formation_features(pd.read_parquet(DATA / "lineups.parquet"))
+    feats = assemble(matches, team_attributes, formations, scaler, kmeans)
 
     feats.to_parquet(HERE / "features.parquet", index=False)
     centroids = pd.DataFrame(kmeans.cluster_centers_, columns=TACTICS).rename_axis("style").reset_index()

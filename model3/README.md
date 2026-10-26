@@ -3,9 +3,52 @@
 **Question:** does a team that plays style X tend to beat a team that plays style Y?
 
 ```bash
-python model3/build_features.py   # ~40 s -> features.parquet, styles.parquet
-python model3/train.py            # ~20 s -> predictions/, metrics.json, figures/
+python model3/build_features.py   # ~40 s -> features.parquet, styles.parquet, styles.joblib
+python model3/train.py            # ~20 s -> predictions/, metrics.json, model3.joblib, figures/style_*
+python model3/eda.py              # ~5 s  -> figures/eda_*, eda_summary.md
+python model3/predict.py "Barcelona" "Real Madrid CF"
 ```
+
+| File | Purpose |
+|---|---|
+| `build_features.py` | tactics → styles → three graphs → one feature row per match |
+| `train.py` | gradient boosting, ablation, test scores, predictions for the ensemble |
+| `eda.py` | what the tactic data and the graphs look like |
+| `predict.py` | team A (home) vs team B (away) |
+
+## EDA
+
+Input: `team_attributes` — 1,457 tactic snapshots of 288 teams, one per team per year (2010–2015), eight settings
+on a 20–80 scale. Anything that uses match results is computed on the training split only.
+
+![tactic correlation](figures/eda_tactic_correlation.png)
+
+- **The eight tactics carry mostly separate information**: mean |r| = 0.17. The tightest pairs are defence pressure
+  with defence width (0.51) and with aggression (0.42), and build-up speed with build-up passing (0.40).
+  There is little redundancy to remove, so all eight are kept.
+
+![style map](figures/eda_style_map.png)
+
+- **Styles are regions of one continuous cloud.** On the first two principal components (47 % of the variance)
+  the four K-means styles sit side by side with no gaps between them.
+- **A team's style is not fixed**: it keeps the same style from one yearly snapshot to the next only 59 % of the time.
+
+![tactics vs points](figures/eda_tactics_vs_points.png)
+
+- **A single tactic says little about results**: the strongest correlation with points won is +0.07 (defence
+  pressure) and −0.06 (long build-up passing). Style matters through combinations and matchups, if at all.
+
+![similarity graph](figures/eda_similarity_graph.png)
+
+- **The similarity graph groups teams that play alike.** In the 2015/16 Premier League (20 teams, 44 edges,
+  density 0.23, average clustering 0.44) the possession sides (S2: Arsenal, Man City, Liverpool, Tottenham…) form one
+  neighbourhood and the direct sides (S1) another; Leicester is the only S0 team.
+
+![pagerank gap vs result](figures/eda_pagerank_diff_vs_result.png)
+
+- **PageRank on the results graph tracks strength**: the home team wins 73 % when its PageRank is more than 0.9
+  above the away team's and 23 % when it is more than 0.9 below.
+- **Coverage**: no match has a style in 2008/09, 34 % in 2009/10, and 93–96 % from 2010/11 on.
 
 ## Method
 
@@ -54,6 +97,27 @@ outcomes is built only from *training* matches dated strictly before the match b
 - **The styles are not well-separated clusters** (silhouette 0.13): tactics vary continuously, so the 4 styles are a
   convenient discretisation rather than natural groups.
 - **25 % of matches have no style** (tactics start in February 2010); for those the model falls back on the results graph.
+
+## Team A vs team B
+
+`predict.py` appends the hypothetical match to the real ones and runs the same feature builder, so the graphs are
+built exactly as in training (training matches before the date). Each team is assumed to use the formation of its
+last match. Both teams must play in the same league.
+
+```
+$ python model3/predict.py "Barcelona" "Real Madrid CF"
+FC Barcelona (home) vs Real Madrid CF (away) on 2016-05-15
+  Spain LIGA BBVA
+  home: style S2 (+defenceAggression, −chanceCreationPassing);  results-graph PageRank 1.62 (1.00 = league average)
+  away: style S0 (−chanceCreationCrossing, +defenceTeamWidth);  results-graph PageRank 1.5 (1.00 = league average)
+  style matchup, S2 at home vs S0 away, over 639 earlier matches: home 40.1%  draw 23.8%  away 36.1%
+  points per game against the opponent and teams that play like it: home 2.38 (8 matches), away 2.45 (11 matches)
+  P(home win) 53.6%   P(draw) 23.1%   P(away win) 23.3%
+  prediction: home win
+```
+
+The style matchup alone gives the home side only 40 %, but the model says 54 %: both teams' PageRank is far above
+the league average, and the final call rests on all the features together, not on style alone.
 
 ## Outputs for the ensemble
 

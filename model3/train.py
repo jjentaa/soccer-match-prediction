@@ -3,6 +3,7 @@
 Trains on the shared 70 % split, evaluates on the 30 % test split, and writes:
   predictions/model3_test.parquet        p_H, p_D, p_A for every test match
   predictions/model3_train_oof.parquet   5-fold out-of-fold probabilities for every training match (for stacking)
+  model3.joblib                          fitted final model and its feature list (used by predict.py)
   metrics.json                           accuracy / macro F1 of the model, its ablations and the baselines
   figures/style_profiles.png, figures/style_matchups.png
 
@@ -12,6 +13,7 @@ Usage: python model3/train.py        (run build_features.py first)
 import json
 from pathlib import Path
 
+import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -163,6 +165,7 @@ def main() -> None:
     # predictions come from the unweighted final model: its probabilities are calibrated, which the
     # ensemble needs; class re-weighting can be applied once, at the ensemble stage
     final = make_model(cols).fit(train[cols], train["result"])
+    joblib.dump({"model": final, "features": cols}, HERE / "model3.joblib")
     save_predictions(test["match_api_id"], final.predict_proba(test[cols]), final.classes_,
                      HERE / "predictions" / "model3_test.parquet")
     folds = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
