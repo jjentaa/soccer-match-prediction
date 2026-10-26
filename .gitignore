@@ -20,4 +20,5 @@ kaggle.json
 # report and slides are kept out of the repo
 docs/
 *.docx
+*.pdf
 ~$*
